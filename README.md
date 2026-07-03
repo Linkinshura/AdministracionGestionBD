@@ -1,5 +1,5 @@
-# Analisis y Gestion de Base de Datos
-Repo de Analisis y Gestion de Base de Datos
+# Administracion y Gestion de Base de Datos
+Repo de Administracion y Gestion de Base de Datos
 
 
 ## Mail profe:
