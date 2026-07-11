@@ -1,8 +1,8 @@
-DROP DATABASE IF EXISTS club_deportivo;
-CREATE DATABASE club_deportivo;
-USE club_deportivo;
+CREATE DATABASE ClubDeportivo;
+USE ClubDeportivo;
 
-CREATE TABLE persona (
+
+CREATE TABLE Persona (
     dni INT PRIMARY KEY,
     nombre VARCHAR(50) NOT NULL,
     apellido VARCHAR(50) NOT NULL,
@@ -10,108 +10,111 @@ CREATE TABLE persona (
     email VARCHAR(100)
 );
 
-CREATE TABLE socio (
-    dni INT PRIMARY KEY,
-    nro_carnet INT NOT NULL AUTO_INCREMENT UNIQUE,
-    estado_habilitacion ENUM('Habilitado','Inhabilitado') NOT NULL DEFAULT 'Habilitado',
-    fecha_alta DATE NOT NULL DEFAULT (CURRENT_DATE),
-    fecha_vencimiento_cuota DATE NOT NULL,
-    FOREIGN KEY (dni) REFERENCES persona(dni) ON DELETE CASCADE
+
+CREATE TABLE Socio (
+    nro_carnet INT AUTO_INCREMENT PRIMARY KEY,
+    dni INT NOT NULL UNIQUE,
+    estado VARCHAR(20) NOT NULL,
+    FOREIGN KEY (dni) REFERENCES Persona(dni)
 );
 
-CREATE TABLE no_socio (
-    dni INT PRIMARY KEY,
-    FOREIGN KEY (dni) REFERENCES persona(dni) ON DELETE CASCADE
+
+CREATE TABLE NoSocio (
+    id_no_socio INT AUTO_INCREMENT PRIMARY KEY,
+    dni INT NOT NULL UNIQUE,
+    FOREIGN KEY (dni) REFERENCES Persona(dni)
 );
 
-CREATE TABLE profesor (
-    dni INT PRIMARY KEY,
-    legajo INT NOT NULL AUTO_INCREMENT UNIQUE,
-    sueldo_mensual DECIMAL(10,2) NOT NULL,
-    FOREIGN KEY (dni) REFERENCES persona(dni) ON DELETE CASCADE
+
+CREATE TABLE Profesor (
+    legajo INT AUTO_INCREMENT PRIMARY KEY,
+    dni INT NOT NULL UNIQUE,
+    sueldo DECIMAL(10,2) NOT NULL,
+    FOREIGN KEY (dni) REFERENCES Persona(dni)
 );
 
-CREATE TABLE actividad (
-    id_actividad INT PRIMARY KEY AUTO_INCREMENT,
-    nombre VARCHAR(60) NOT NULL UNIQUE,
-    descripcion VARCHAR(200)
+
+CREATE TABLE Salon (
+    id_salon INT AUTO_INCREMENT PRIMARY KEY,
+    nombre VARCHAR(50) NOT NULL,
+    capacidad INT
 );
 
-CREATE TABLE salon (
-    id_salon INT PRIMARY KEY AUTO_INCREMENT,
-    nombre VARCHAR(50) NOT NULL UNIQUE,
-    capacidad INT NOT NULL
+
+CREATE TABLE Actividad (
+    id_actividad INT AUTO_INCREMENT PRIMARY KEY,
+    nombre VARCHAR(50) NOT NULL,
+    descripcion VARCHAR(100)
 );
 
-CREATE TABLE clase (
-    id_clase INT PRIMARY KEY AUTO_INCREMENT,
+
+CREATE TABLE Clase (
+    id_clase INT AUTO_INCREMENT PRIMARY KEY,
     id_actividad INT NOT NULL,
-    dni_profesor INT NOT NULL,
+    legajo INT NOT NULL,
     id_salon INT NOT NULL,
-    dia_semana ENUM('Lunes','Martes','Miercoles','Jueves','Viernes','Sabado','Domingo') NOT NULL,
-    hora_inicio TIME NOT NULL,
-    hora_fin TIME NOT NULL,
-    FOREIGN KEY (id_actividad) REFERENCES actividad(id_actividad),
-    FOREIGN KEY (dni_profesor) REFERENCES profesor(dni),
-    FOREIGN KEY (id_salon) REFERENCES salon(id_salon)
+    dia VARCHAR(15) NOT NULL,
+    horario TIME NOT NULL,
+    FOREIGN KEY (id_actividad) REFERENCES Actividad(id_actividad),
+    FOREIGN KEY (legajo) REFERENCES Profesor(legajo),
+    FOREIGN KEY (id_salon) REFERENCES Salon(id_salon)
 );
 
-CREATE TABLE pase_diario (
-    id_pase INT PRIMARY KEY AUTO_INCREMENT,
-    dni_no_socio INT NOT NULL,
+
+CREATE TABLE Inscripcion (
+    id_inscripcion INT AUTO_INCREMENT PRIMARY KEY,
+    id_clase INT NOT NULL,
+    nro_carnet INT,
+    id_no_socio INT,
     fecha DATE NOT NULL,
-    monto DECIMAL(8,2) NOT NULL,
-    FOREIGN KEY (dni_no_socio) REFERENCES no_socio(dni),
-    UNIQUE (dni_no_socio, fecha)
+    FOREIGN KEY (id_clase) REFERENCES Clase(id_clase),
+    FOREIGN KEY (nro_carnet) REFERENCES Socio(nro_carnet),
+    FOREIGN KEY (id_no_socio) REFERENCES NoSocio(id_no_socio)
 );
 
-CREATE TABLE cuota (
-    id_cuota INT PRIMARY KEY AUTO_INCREMENT,
-    dni_socio INT NOT NULL,
-    periodo_mes TINYINT NOT NULL,
-    periodo_anio SMALLINT NOT NULL,
+
+CREATE TABLE Cuota (
+    id_cuota INT AUTO_INCREMENT PRIMARY KEY,
+    nro_carnet INT NOT NULL,
     fecha_emision DATE NOT NULL,
     fecha_vencimiento DATE NOT NULL,
-    fecha_pago DATE,
-    monto DECIMAL(8,2) NOT NULL,
-    estado ENUM('Pendiente','Pagada','Vencida') NOT NULL DEFAULT 'Pendiente',
-    FOREIGN KEY (dni_socio) REFERENCES socio(dni),
-    UNIQUE (dni_socio, periodo_mes, periodo_anio)
+    importe DECIMAL(10,2) NOT NULL,
+    pagada BOOLEAN DEFAULT FALSE,
+    FOREIGN KEY (nro_carnet) REFERENCES Socio(nro_carnet)
 );
 
-CREATE TABLE inscripcion (
-    id_inscripcion INT PRIMARY KEY AUTO_INCREMENT,
-    dni_persona INT NOT NULL,
-    id_clase INT NOT NULL,
-    fecha_inscripcion DATE NOT NULL DEFAULT (CURRENT_DATE),
-    FOREIGN KEY (dni_persona) REFERENCES persona(dni),
-    FOREIGN KEY (id_clase) REFERENCES clase(id_clase),
-    UNIQUE (dni_persona, id_clase)
+
+CREATE TABLE PaseDiario (
+    id_pase INT AUTO_INCREMENT PRIMARY KEY,
+    id_no_socio INT NOT NULL,
+    fecha DATE NOT NULL,
+    importe DECIMAL(10,2) NOT NULL,
+    FOREIGN KEY (id_no_socio) REFERENCES NoSocio(id_no_socio)
 );
 
-CREATE TABLE asistencia_profesor (
-    id_asistencia INT PRIMARY KEY AUTO_INCREMENT,
-    dni_profesor INT NOT NULL,
+
+CREATE TABLE AsistenciaProfesor (
+    id_asistencia INT AUTO_INCREMENT PRIMARY KEY,
+    legajo INT NOT NULL,
     fecha DATE NOT NULL,
     hora_entrada TIME NOT NULL,
-    FOREIGN KEY (dni_profesor) REFERENCES profesor(dni),
-    UNIQUE (dni_profesor, fecha)
+    FOREIGN KEY (legajo) REFERENCES Profesor(legajo)
 );
 
-CREATE TABLE turno_nutricion (
-    id_turno INT PRIMARY KEY AUTO_INCREMENT,
-    dni_socio INT NOT NULL,
-    fecha_turno DATE NOT NULL,
-    hora_turno TIME NOT NULL,
-    estado ENUM('Solicitado','Atendido','Cancelado') NOT NULL DEFAULT 'Solicitado',
-    FOREIGN KEY (dni_socio) REFERENCES socio(dni)
+
+CREATE TABLE TurnoNutricion (
+    id_turno INT AUTO_INCREMENT PRIMARY KEY,
+    nro_carnet INT NOT NULL,
+    fecha DATE NOT NULL,
+    hora TIME NOT NULL,
+    FOREIGN KEY (nro_carnet) REFERENCES Socio(nro_carnet)
 );
 
-CREATE TABLE ficha_medica (
-    id_ficha INT PRIMARY KEY AUTO_INCREMENT,
-    id_turno INT NOT NULL UNIQUE,
-    carga_permitida ENUM('Liviana','Moderada','Intensa') NOT NULL,
-    observaciones VARCHAR(500),
-    fecha_confeccion DATE NOT NULL DEFAULT (CURRENT_DATE),
-    FOREIGN KEY (id_turno) REFERENCES turno_nutricion(id_turno)
+
+CREATE TABLE FichaMedica (
+    id_ficha INT AUTO_INCREMENT PRIMARY KEY,
+    nro_carnet INT NOT NULL,
+    carga_permitida VARCHAR(20) NOT NULL,
+    observaciones VARCHAR(255),
+    FOREIGN KEY (nro_carnet) REFERENCES Socio(nro_carnet)
 );
