@@ -6,9 +6,13 @@ INSERT INTO Persona (dni, nombre, apellido, telefono, email) VALUES
 (40555666, 'Pedro', 'Fernandez', '1178901234', 'pedro@gmail.com'),
 (40666777, 'Lucia', 'Romero', '1189012345', 'lucia@gmail.com');
 
-INSERT INTO Socio (dni, estado) VALUES
-(40111222, 'Habilitado'),
-(40222333, 'Inhabilitado');
+INSERT INTO EstadoSocio (descripcion) VALUES
+('Habilitado'),
+('Inhabilitado');
+
+INSERT INTO Socio (dni, id_estado) VALUES
+(40111222, 1),
+(40222333, 2);
 
 INSERT INTO NoSocio (dni) VALUES
 (40333444),
@@ -26,11 +30,17 @@ INSERT INTO Actividad (nombre, descripcion) VALUES
 ('Musculacion', 'Entrenamiento con pesas'),
 ('Natacion', 'Clases de natacion');
 
-INSERT INTO Clase (id_actividad, legajo, id_salon, dia, horario) VALUES
-(1, 1, 1, 'Lunes', '09:00:00'),
-(2, 2, 2, 'Miercoles', '18:00:00'),
-(1, 1, 1, 'Viernes', '10:00:00'),
-(2, 2, 2, 'Sabado', '11:30:00');
+INSERT INTO DiaSemana (nombre) VALUES
+('Lunes'),
+('Miercoles'),
+('Viernes'),
+('Sabado');
+
+INSERT INTO Clase (id_actividad, legajo, id_salon, id_dia, horario) VALUES
+(1, 1, 1, 1, '09:00:00'),
+(2, 2, 2, 2, '18:00:00'),
+(1, 1, 1, 3, '10:00:00'),
+(2, 2, 2, 4, '11:30:00');
 
 INSERT INTO Inscripcion (id_clase, nro_carnet, id_no_socio, fecha) VALUES
 (1, 1, NULL, '2026-07-01'),
@@ -54,6 +64,10 @@ INSERT INTO TurnoNutricion (nro_carnet, fecha, hora) VALUES
 (1, '2026-07-10', '10:00:00'),
 (2, '2026-07-11', '11:00:00');
 
-INSERT INTO FichaMedica (nro_carnet, carga_permitida, observaciones) VALUES
-(1, 'Moderada', 'Sin observaciones'),
-(2, 'Liviana', 'Evitar ejercicios de alto impacto');
+INSERT INTO CargaActividad (descripcion) VALUES
+('Liviana'),
+('Moderada');
+
+INSERT INTO FichaMedica (nro_carnet, id_carga, observaciones) VALUES
+(1, 2, 'Sin observaciones'),
+(2, 1, 'Evitar ejercicios de alto impacto');
