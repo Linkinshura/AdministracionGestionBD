@@ -1,4 +1,5 @@
-CREATE DATABASE ClubDeportivo;
+DROP DATABASE IF EXISTS ClubDeportivo;
+CREATE DATABASE IF NOT EXISTS ClubDeportivo;
 USE ClubDeportivo;
 
 CREATE TABLE Persona (
@@ -9,12 +10,21 @@ CREATE TABLE Persona (
     email VARCHAR(100)
 );
 
+CREATE TABLE EstadoSocio (
+    id_estado INT AUTO_INCREMENT PRIMARY KEY,
+    descripcion VARCHAR(20) NOT NULL UNIQUE
+);
+
 CREATE TABLE Socio (
     nro_carnet INT AUTO_INCREMENT PRIMARY KEY,
     dni INT NOT NULL UNIQUE,
-    estado VARCHAR(20) NOT NULL,
+    id_estado INT NOT NULL,
     FOREIGN KEY (dni)
         REFERENCES Persona(dni)
+        ON UPDATE CASCADE
+        ON DELETE RESTRICT,
+    FOREIGN KEY (id_estado)
+        REFERENCES EstadoSocio(id_estado)
         ON UPDATE CASCADE
         ON DELETE RESTRICT
 );
@@ -41,7 +51,7 @@ CREATE TABLE Profesor (
 CREATE TABLE Salon (
     id_salon INT AUTO_INCREMENT PRIMARY KEY,
     nombre VARCHAR(50) NOT NULL,
-    capacidad INT
+    capacidad INT NOT NULL
 );
 
 CREATE TABLE Actividad (
@@ -50,12 +60,17 @@ CREATE TABLE Actividad (
     descripcion VARCHAR(100)
 );
 
+CREATE TABLE DiaSemana (
+    id_dia INT AUTO_INCREMENT PRIMARY KEY,
+    nombre VARCHAR(15) NOT NULL UNIQUE
+);
+
 CREATE TABLE Clase (
     id_clase INT AUTO_INCREMENT PRIMARY KEY,
     id_actividad INT NOT NULL,
     legajo INT NOT NULL,
     id_salon INT NOT NULL,
-    dia VARCHAR(15) NOT NULL,
+    id_dia INT NOT NULL,
     horario TIME NOT NULL,
     FOREIGN KEY (id_actividad)
         REFERENCES Actividad(id_actividad)
@@ -68,14 +83,18 @@ CREATE TABLE Clase (
     FOREIGN KEY (id_salon)
         REFERENCES Salon(id_salon)
         ON UPDATE CASCADE
+        ON DELETE RESTRICT,
+    FOREIGN KEY (id_dia)
+        REFERENCES DiaSemana(id_dia)
+        ON UPDATE CASCADE
         ON DELETE RESTRICT
 );
 
 CREATE TABLE Inscripcion (
     id_inscripcion INT AUTO_INCREMENT PRIMARY KEY,
     id_clase INT NOT NULL,
-    nro_carnet INT,
-    id_no_socio INT,
+    nro_carnet INT NULL,
+    id_no_socio INT NULL,
     fecha DATE NOT NULL,
     FOREIGN KEY (id_clase)
         REFERENCES Clase(id_clase)
@@ -137,13 +156,22 @@ CREATE TABLE TurnoNutricion (
         ON DELETE RESTRICT
 );
 
+CREATE TABLE CargaActividad (
+    id_carga INT AUTO_INCREMENT PRIMARY KEY,
+    descripcion VARCHAR(20) NOT NULL UNIQUE
+);
+
 CREATE TABLE FichaMedica (
     id_ficha INT AUTO_INCREMENT PRIMARY KEY,
     nro_carnet INT NOT NULL,
-    carga_permitida VARCHAR(20) NOT NULL,
+    id_carga INT NOT NULL,
     observaciones VARCHAR(255),
     FOREIGN KEY (nro_carnet)
         REFERENCES Socio(nro_carnet)
+        ON UPDATE CASCADE
+        ON DELETE RESTRICT,
+    FOREIGN KEY (id_carga)
+        REFERENCES CargaActividad(id_carga)
         ON UPDATE CASCADE
         ON DELETE RESTRICT
 );
