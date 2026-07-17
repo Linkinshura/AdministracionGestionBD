@@ -1,29 +1,63 @@
--- 1. Listado de todas las personas
+-- 1. Listado de personas
 SELECT * FROM Persona;
 
--- 2. Listado de socios con su estado
+-- 2. Listado de socios
 SELECT
     s.nro_carnet,
     p.nombre,
     p.apellido,
-    es.descripcion AS estado
+    s.estado
 FROM Socio s
-JOIN Persona p ON s.dni = p.dni
-JOIN EstadoSocio es ON s.id_estado = es.id_estado;
+JOIN Persona p ON s.dni = p.dni;
 
 -- 3. Estado actual de un socio
 SELECT
     p.nombre,
     p.apellido,
-    es.descripcion AS estado
+    s.estado
 FROM Socio s
 JOIN Persona p ON s.dni = p.dni
-JOIN EstadoSocio es ON s.id_estado = es.id_estado
 WHERE s.nro_carnet = 1;
 
--- 4. Vencimientos diarios
+-- 4. Listado de profesores
 SELECT
-    c.id_cuota,
+    pr.legajo,
+    p.nombre,
+    p.apellido,
+    pr.sueldo
+FROM Profesor pr
+JOIN Persona p ON pr.dni = p.dni;
+
+-- 5. Listado de actividades
+SELECT * FROM Actividad;
+
+-- 6. Clases programadas
+SELECT
+    c.id_clase,
+    a.nombre AS actividad,
+    c.dia,
+    c.horario,
+    s.nombre AS salon
+FROM Clase c
+JOIN Actividad a ON c.id_actividad = a.id_actividad
+JOIN Salon s ON c.id_salon = s.id_salon;
+
+-- 7. Listado de alumnos inscriptos
+SELECT
+    i.id_inscripcion,
+    p.nombre,
+    p.apellido,
+    a.nombre AS actividad,
+    c.dia,
+    c.horario
+FROM Inscripcion i
+JOIN Socio so ON i.nro_carnet = so.nro_carnet
+JOIN Persona p ON so.dni = p.dni
+JOIN Clase c ON i.id_clase = c.id_clase
+JOIN Actividad a ON c.id_actividad = a.id_actividad;
+
+-- 8. Vencimientos diarios
+SELECT
     p.nombre,
     p.apellido,
     c.fecha_vencimiento
@@ -32,134 +66,94 @@ JOIN Socio s ON c.nro_carnet = s.nro_carnet
 JOIN Persona p ON s.dni = p.dni
 WHERE c.fecha_vencimiento = CURDATE();
 
--- 5. Cuotas pagadas
-SELECT *
-FROM Cuota
-WHERE pagada = TRUE;
-
--- 6. Cuotas pendientes
+-- 9. Cuotas pendientes
 SELECT *
 FROM Cuota
 WHERE pagada = FALSE;
 
--- 7. Listado de profesores
-SELECT
-    pr.legajo,
-    pe.nombre,
-    pe.apellido,
-    pr.sueldo
-FROM Profesor pr
-JOIN Persona pe ON pr.dni = pe.dni;
+-- 10. Cuotas pagadas
+SELECT *
+FROM Cuota
+WHERE pagada = TRUE;
 
--- 8. Asistencia de profesores
-SELECT
-    pe.nombre,
-    pe.apellido,
-    ap.fecha,
-    ap.hora_entrada
-FROM AsistenciaProfesor ap
-JOIN Profesor pr ON ap.legajo = pr.legajo
-JOIN Persona pe ON pr.dni = pe.dni;
-
--- 9. Listado de actividades
-SELECT * FROM Actividad;
-
--- 10. Clases programadas
-SELECT
-    c.id_clase,
-    a.nombre AS actividad,
-    ds.nombre AS dia,
-    c.horario,
-    sa.nombre AS salon
-FROM Clase c
-JOIN Actividad a ON c.id_actividad = a.id_actividad
-JOIN DiaSemana ds ON c.id_dia = ds.id_dia
-JOIN Salon sa ON c.id_salon = sa.id_salon;
-
--- 11. Listado de alumnos inscriptos
-SELECT
-    i.id_inscripcion,
-    a.nombre AS actividad,
-    c.horario,
-    COALESCE(ps.nombre, pns.nombre) AS nombre,
-    COALESCE(ps.apellido, pns.apellido) AS apellido
-FROM Inscripcion i
-JOIN Clase c ON i.id_clase = c.id_clase
-JOIN Actividad a ON c.id_actividad = a.id_actividad
-LEFT JOIN Socio s ON i.nro_carnet = s.nro_carnet
-LEFT JOIN Persona ps ON s.dni = ps.dni
-LEFT JOIN NoSocio ns ON i.id_no_socio = ns.id_no_socio
-LEFT JOIN Persona pns ON ns.dni = pns.dni;
-
--- 12. No socios con pase diario
+-- 11. Asistencia de profesores
 SELECT
     p.nombre,
     p.apellido,
-    pd.fecha,
-    pd.importe
-FROM PaseDiario pd
-JOIN NoSocio ns ON pd.id_no_socio = ns.id_no_socio
-JOIN Persona p ON ns.dni = p.dni;
+    a.fecha,
+    a.hora_entrada
+FROM AsistenciaProfesor a
+JOIN Profesor pr ON a.legajo = pr.legajo
+JOIN Persona p ON pr.dni = p.dni;
 
--- 13. Turnos de nutrición
+-- 12. Turnos de nutrición
 SELECT
     p.nombre,
     p.apellido,
-    tn.fecha,
-    tn.hora
-FROM TurnoNutricion tn
-JOIN Socio s ON tn.nro_carnet = s.nro_carnet
+    t.fecha,
+    t.hora
+FROM TurnoNutricion t
+JOIN Socio s ON t.nro_carnet = s.nro_carnet
 JOIN Persona p ON s.dni = p.dni;
 
--- 14. Fichas médicas
+-- 13. Fichas médicas
 SELECT
     p.nombre,
     p.apellido,
-    ca.descripcion AS carga_permitida,
-    fm.observaciones
-FROM FichaMedica fm
-JOIN Socio s ON fm.nro_carnet = s.nro_carnet
-JOIN Persona p ON s.dni = p.dni
-JOIN CargaActividad ca ON fm.id_carga = ca.id_carga;
+    f.carga_permitida,
+    f.observaciones
+FROM FichaMedica f
+JOIN Socio s ON f.nro_carnet = s.nro_carnet
+JOIN Persona p ON s.dni = p.dni;
 
--- 15. Cantidad de socios
+-- 14. Cantidad de socios
 SELECT COUNT(*) AS total_socios
 FROM Socio;
 
--- 16. Cantidad de profesores
+-- 15. Cantidad de profesores
 SELECT COUNT(*) AS total_profesores
 FROM Profesor;
 
--- 17. Cantidad de actividades
+-- 16. Cantidad de actividades
 SELECT COUNT(*) AS total_actividades
 FROM Actividad;
 
--- 18. Cantidad de clases por actividad
+-- 17. Clases por profesor
 SELECT
-    a.nombre,
-    COUNT(*) AS cantidad_clases
-FROM Clase c
-JOIN Actividad a ON c.id_actividad = a.id_actividad
-GROUP BY a.nombre;
+    p.nombre,
+    p.apellido,
+    COUNT(c.id_clase) AS cantidad_clases
+FROM Profesor pr
+JOIN Persona p ON pr.dni = p.dni
+LEFT JOIN Clase c ON pr.legajo = c.legajo
+GROUP BY pr.legajo;
 
--- 19. Socios habilitados
+-- 18. Socios habilitados
 SELECT
     p.nombre,
     p.apellido
 FROM Socio s
 JOIN Persona p ON s.dni = p.dni
-JOIN EstadoSocio es ON s.id_estado = es.id_estado
-WHERE es.descripcion = 'Habilitado';
+WHERE s.estado = 'Habilitado';
 
--- 20. Clases con su profesor
+-- 19. Socios inhabilitados
+SELECT
+    p.nombre,
+    p.apellido
+FROM Socio s
+JOIN Persona p ON s.dni = p.dni
+WHERE s.estado = 'Inhabilitado';
+
+-- 20. Clases con su profesor y salón
 SELECT
     a.nombre AS actividad,
-    pe.nombre,
-    pe.apellido,
-    ds.nombre AS dia,
-    c.horario
+    p.nombre,
+    p.apellido,
+    c.dia,
+    c.horario,
+    s.nombre AS salon
 FROM Clase c
 JOIN Actividad a ON c.id_actividad = a.id_actividad
 JOIN Profesor pr ON c.legajo = pr.legajo
-JOIN Persona pe ON pr.dni = pe.dni
-JOIN DiaSemana ds ON c.id_dia = ds.id_dia;
+JOIN Persona p ON pr.dni = p.dni
+JOIN Salon s ON c.id_salon = s.id_salon;
